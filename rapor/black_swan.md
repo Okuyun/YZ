@@ -1,4 +1,5 @@
-May 26, 2023 at 9:08 PM Ali Aydin Selcuk --
+May 26, 2023 at 9:08 PM 
+[Ali Aydin Selcuk](https://groups.google.com/g/yz-ve-insan/c/wLR1TZBPIg4) --
 [business insider](https://www.businessinsider.com/chatgpt-changed-everything-and-was-a-black-swan-event-2023-5)
 
 ## ChatGPT: Siyah bir kuğu
@@ -20,3 +21,8 @@ Düzenleyiciler, yapay zekânın işleri etkileme ve iftira gibi risklerine kar�
 
 YZ'nın potansiyel riskleri konusunda artan uyarılar dikkate alınıyor. Geçmişte Google'da çalışan ve "YZ'nın babası" olarak anılan Geoffrey Hinton bazı riskleri dile getiriyor. OpenAI, kişiselleştirilmiş yanlış bilgilendirme endişelerini dile getiriyor ve YZ'nın kullanıcıların düşünce süreçlerini etkileme potansiyeline dikkat çekiyor.
 
+<style>
+  body {
+    max-width: 550px;
+  }
+</style>
