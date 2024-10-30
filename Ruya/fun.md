@@ -1,6 +1,9 @@
-## Fun English Links 2024
 
 ⇒ go to [weekly work](https://eyler.blogspot.com/p/special.html) with Rabia Öztürk
+
+![Fun English](Fun image.png)
+
+## Links -- 2024  
 
 ### W6 – Oct 25
 1. GAME: <a target=fun href="https://wordwall.net/resource/5183722">“Present Simple affirmative”</a>
@@ -71,4 +74,8 @@
 7. VIDEO: <a href="https://youtube.com/watch?v=vOZJw-V1qtI">Learn Big Numbers to 1000</a>
 
 
-
+<script>
+let i = document.createElement('link')
+i.rel="icon"; i.href="/YZ/Ruya/Fun icon.png"
+document.head.append(i)
+</script>
