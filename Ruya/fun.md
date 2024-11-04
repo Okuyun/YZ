@@ -3,7 +3,21 @@
 
 ![Fun English](Fun image.png)
 
-## Links -- 2024  
+## Links -- 2024
+
+### W7 – Nov 1
+1) GAME: <a target=fun href="https://wordwall.net/resource/5123063">“Find the match (House)”</a>
+
+3) GAME: <a target=fun href="https://wordwall.net/resource/5124460">“Memory Game (House)”</a>
+
+4) GAME: <a target=fun href="https://highlightskids.com/games/hidden-pictures/harvest-apples">“Find the hidden objects”</a>
+
+6) GAME: <a target=fun href="https://wordwall.net/resource/5157286/l-3-house-voc-g1-2">“Image Quiz House voc.”</a>
+
+7) WS: <a target=fun href="https://liveworksheets.com/worksheets/en/English_as_a_Second_Language_(ESL)/The_house/House_objects_and_rooms_og2118lk">House objects and rooms</a>
+
+8) GAME: <a target=fun href="https://baamboozle.com/game/194958">“Flags and Countries”</a>
+
 
 ### W6 – Oct 25
 1. GAME: <a target=fun href="https://wordwall.net/resource/5183722">“Present Simple affirmative”</a>
@@ -78,4 +92,5 @@
 let i = document.createElement('link')
 i.rel="icon"; i.href="/YZ/Ruya/Fun icon.png"
 document.head.append(i)
+document.title='Fun English'
 </script>
