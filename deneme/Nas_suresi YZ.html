@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<!-- Yapay zeka tarfından üretildi -- Kadir Öztürk, Safranbolu -->
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kur'an-ı Kerim - Etkileşimli Sayfa</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Amiri&display=swap');
+    body {
+      font-family: 'Amiri', serif;
+      direction: rtl;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 1rem;
+    }
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.1);
+    }
+    h2 {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .ayah {
+      text-align: justify;
+      margin-bottom: 1.5rem;
+      font-size: 0,5rem;
+      line-height: 3rem;
+    }
+    .word {
+      cursor: pointer;
+      padding: 0.1rem 0.3rem;
+      margin: 0.1rem;
+      position: relative;
+      display: inline-block;
+      pointer-events: all;
+    }
+    .word:hover {
+      background-color: #e6f7ff;
+    }
+    .tooltip {
+      display: none;
+      position: absolute;
+      background-color: #fff;
+      border: 1px solid #aaa;
+      border-radius: 5px;
+      padding: 0.5rem;
+      max-width: 280px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.2);
+      z-index: 1000;
+      font-size: 1rem;
+      white-space: nowrap;
+    }
+    .ayah-number {
+      font-size: 1.5rem;
+      margin-right: 0.5rem;
+      color: #666;
+      vertical-align: super;
+    }
+    @media screen and (max-width: 600px) {
+      .ayah {
+        font-size: 1rem;
+        line-height: 2.5rem;
+      }
+      .tooltip {
+        font-size: 0.9rem;
+        max-width: 90%;
+        }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2><span class="word" data-meaning="Sûresi">سُورَةُ</span>
+    <span class="word" data-meaning="Nâs-İnsanlar">النَّاسِ</span></h2>
+    <h2><span class="word" data-meaning="adıyla">بِسْمِ</span>
+    <span class="word" data-meaning="Allah'ın">اللَّهِ</span>
+    <span class="word" data-meaning="Çok merhametli">الرَّحْمَٰنِ</span>
+    <span class="word" data-meaning="Çok esirgeyen">الرَّحِيمِ</span></h2>
+      
+  <div class="ayah">
+      <h2><span class="word" data-meaning="De ki">قُلْ</span>
+      <span class="word" data-meaning="sığınırım">أَعُوذُ</span>
+      <span class="word" data-meaning="Rabbine">بِرَبِّ</span>
+      <span class="word" data-meaning="İnsanların">ٱلنَّاسِ</span>
+      <span class="word" data-meaning="De ki: insanların Rabbi olan Allah'a sığınırım">(1)</span></h2>
+      <h2><span class="word" data-meaning="mâlik ve hâkimine">مَلِكِ</span>
+      <span class="word" data-meaning="İnsanların">ٱلنَّاسِ</span>
+      <span class="word" data-meaning="insanların mâlik ve hâkimine">(2)</span></h2>
+      <h2><span class="word" data-meaning="mâbuduna">إِلَـٰهِ</span>
+      <span class="word" data-meaning="İnsanların">ٱلنَّاسِ</span>
+      <span class="word" data-meaning="insanların mâbuduna">(3)</span></h2>
+      <h2><span class="word" data-meaning="-den">مِن</span>
+      <span class="word" data-meaning="şerri(n)-, kötülüğü(n)-">شَرِّ</span>
+      <span class="word" data-meaning="vesvesecinin">ٱلْوَسْوَاسِ</span>
+      <span class="word" data-meaning="sinsi">ٱلْخَنَّاسِ</span>
+      <span class="word" data-meaning="sinsi vesvesecinin (şeytanın) şerrinden">(4)</span></h2>
+      <h2><span class="word" data-meaning="vesvese sokan">ٱلَّذِى يُوَسْوِسُ</span>
+      <span class="word" data-meaning="içerisine">فِى</span>
+      <span class="word" data-meaning="kalplerinin, göğüslerinin">صُدُورِ</span>
+      <span class="word" data-meaning="insanların">ٱلنَّاسِ</span>
+      <span class="word" data-meaning="insanların kalplerine vesvese sokan">(5)</span></h2>
+      <h2><span class="word" data-meaning="cinlerden">مِنَ ٱلْجِنَّةِ</span>
+      <span class="word" data-meaning="ve insanlardan">َوَٱلنَّاسِ</span>
+      <span class="word" data-meaning="Cinlerden olsun insanlardan olsun">(6)</span></h2>
+  </div>
+  </div>
+  <div id="tooltip" class="tooltip"></div>
+  <script>
+    const tooltip = document.getElementById('tooltip');
+    // Pointer events ve olay dinleyicileri
+    document.querySelectorAll('.word').forEach(word => {
+      word.addEventListener('click', (e) => {
+        showTooltip(word);
+      });
+      word.addEventListener('pointerenter', (e) => {
+        if (window.innerWidth > 600) {
+          showTooltip(word);
+        }
+      });
+      word.addEventListener('pointerleave', () => {
+        tooltip.style.display = 'none';
+      });
+      word.addEventListener('touchstart', (e) => {
+        e.preventDefault(); // Dokunma olayını engelle
+        showTooltip(word);
+      });
+    });
+    // Tooltip gösterme fonksiyonu
+    function showTooltip(word) {
+      tooltip.innerText = word.getAttribute('data-meaning');
+      tooltip.style.display = 'block';
+      const rect = word.getBoundingClientRect();
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+      const top = rect.top + scrollTop - tooltip.offsetHeight - 10;
+      const left = rect.left + scrollLeft + rect.width / 2 - tooltip.offsetWidth / 2;
+      tooltip.style.top = top + 'px';
+      tooltip.style.left = left + 'px';
+    }
+    // Tooltip'i başka bir yere tıklayınca gizleme
+    document.addEventListener('click', (e) => {
+      if (!e.target.classList.contains('word')) {
+        tooltip.style.display = 'none';
+      }
+    });
+    document.addEventListener('touchstart', (e) => {
+      if (!e.target.classList.contains('word')) {
+        tooltip.style.display = 'none';
+      }
+    });
+  </script>
+</body>
+</html>
