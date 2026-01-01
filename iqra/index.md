@@ -30,7 +30,7 @@ Bunlar arasında beni en çok düşündüren çalışma bir tanıtım videosu ol
 [https://youtu.be/K2HzA97kD4Q](https://youtu.be/K2HzA97kD4Q)
 
 Videoyu ilk izlediğimde çok etkilendim, hatta hemen kullanmayı bile düşündüm. Ancak dikkatli izleyince bariz hatalar ve ton problemleri göze çarpıyor. <br>
-![Mucem ekranı](mucem_NLM.jpg)
+![Mucem ekranı](img/mucem_NLM.jpg)
 
 Açıklama güzel görünse de, Arapça'ya benzeyen uydurma yazılar ve anlamsız harfler işin ciddiyetini bozuyor. Ayrıca, bu videoda pazarlamacı dili çok baskın. Doğrudan kullanmaya hazır değil, bunu temel alıp daha iyisini yapmak gerekiyor.
 
@@ -41,7 +41,7 @@ Sırada bir Tanıtım sunumu var, uzunca olduğu için buluta yükledim: <br>
 [Iqra_Kuran_yolculugu.pdf](https://okuyun.github.io/YZ/iqra/Iqra_Kuran_yolculugu.pdf)
 
 Yine aynı sorunlar hakim: Sunum çok hızlı üretiliyor ve ilk bakışta muhteşem görünüyor, lakin içerik tamamen yanlış. Tanıtmak istediğimiz Iqra ile ilgisi yok. <br>
-![Hatalı ekranlar](uydurma_NLM.jpg)
+![Hatalı ekranlar](img/uydurma_NLM.jpg)
 
 Ne Iqra soldaki gibi görünüyor, ne de Rehber sağdaki gibi. Üstelik gösterilen metinler ve menüler hepten yanlış! Sadece seçilmiş **da'îfen** kelimesi doğru. Video için verdiğim hüküm bunun için de geçerli: Doğrudan kullanıma hazır değil, bunu temel alıp daha iyisini yapmak gerekiyor.
 
