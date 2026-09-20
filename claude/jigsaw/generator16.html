@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<title>Generator 16</title>
+<style>
+  html,body{margin:0;height:100%;background:#111;color:#ddd;font:13px/1.4 -apple-system,Helvetica,Arial,sans-serif;overflow:hidden}
+  #c{display:block;width:100%;height:100%}
+  .card{position:fixed;width:236px;background:rgba(20,20,20,.9);border:1px solid #333;border-radius:8px;padding:12px;user-select:none;overflow:auto}
+  .card h1{font-size:12px;margin:0 0 8px;font-weight:600;letter-spacing:.08em;color:#fff;text-transform:uppercase}
+  #anim{top:92px;left:12px;max-height:calc(100% - 104px)}
+  #ui{top:12px;right:12px;max-height:calc(60% - 12px)}
+  #scenecard{bottom:12px;right:12px}
+  h2{font-size:11px;margin:4px 0 2px;color:#888;font-weight:600;letter-spacing:.06em;text-transform:uppercase}
+  .row{display:flex;gap:6px;margin:5px 0;align-items:center;flex-wrap:wrap}
+  .row label{flex:1;color:#aaa}
+  button{background:#2a2a2a;color:#eee;border:1px solid #444;border-radius:5px;padding:5px 8px;cursor:pointer;font:inherit}
+  button:hover{background:#3a3a3a}
+  button.on{background:#3b6fd6;border-color:#5b8ff6}
+  input[type=range]{flex:1;min-width:80px}
+  .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin:6px 0}
+  .grid button{padding:8px 0}
+  .hint{color:#777;font-size:11px;margin-top:8px}
+  .sep{border-top:1px solid #333;margin:10px 0}
+  .val{width:40px;text-align:right;color:#aaa;font-variant-numeric:tabular-nums;font-size:11px}
+  #icons{position:fixed;top:12px;left:12px;display:flex;gap:6px;background:rgba(20,20,20,.88);border:1px solid #333;border-radius:8px;padding:8px}
+  #icons button{width:44px;height:58px;padding:2px;display:flex;align-items:center;justify-content:center}
+  #icons canvas{width:36px;height:54px;display:block}
+  #icons .none{font-size:11px;color:#999}
+  #icons img{max-width:38px;max-height:54px;display:block;object-fit:contain}
+  #icons .up{font-size:20px;color:#9fc3ff}
+  #bgopt{display:flex;flex-direction:column;gap:4px;justify-content:center;font-size:11px;color:#aaa;padding-left:4px;border-left:1px solid #333}
+  #bgopt input[type=number]{width:44px;background:#222;color:#eee;border:1px solid #444;border-radius:4px;padding:2px}
+  #kf button{flex:1}
+  .card input[type=number]{width:56px;background:#222;color:#eee;border:1px solid #444;border-radius:5px;padding:4px}
+  select{background:#222;color:#eee;border:1px solid #444;border-radius:5px;padding:4px}
+  .off{opacity:.35;pointer-events:none}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<div id="icons"></div>
+<input type="file" id="upFile" accept="image/*" multiple hidden>
+<div id="bgopt" hidden><label><input type="checkbox" id="bgRm" checked> arkaplan at</label><label>tolerans <input type="number" id="bgTol" min="0" max="250" step="5" value="60"></label></div>
+<div id="anim" class="card">
+  <h1>Animasyon</h1>
+  <h2>Kare</h2>
+  <div class="row" id="kf"><button id="kfA" class="on">A · Başlangıç</button><button id="kfB">B · Bitiş</button></div>
+  <div class="hint" style="margin-top:0">A'da başlangıç, B'de bitiş halini kur. Dokunmadığın paneller diğer kareyi takip eder.</div>
+
+  <div class="sep"></div>
+  <h2>Oynatma</h2>
+  <div id="tl">
+    <div class="row"><label>Genel süre (s)</label><input type="number" id="animDur" min="0.1" max="30" step="0.1" value="10"></div>
+    <div class="row"><label>Easing</label><select id="easing"><option value="io">ease in-out</option><option value="lin">linear</option><option value="in">ease in</option><option value="out">ease out</option></select></div>
+    <div class="row"><label>FPS</label><input type="number" id="fps" min="1" max="120" step="1" value="30"></div>
+    <div class="row"><label>İz süresi (s)</label><input type="number" id="trail" min="0" max="10" step="0.05" value="0"></div>
+    <div class="row"><label>Döngü</label><input type="checkbox" id="loop"></div>
+    <div class="row"><button id="play" style="flex:1">▶ Oynat</button><button id="stopBtn">■</button><button id="edit">Düzenle</button></div>
+    <div class="row"><input type="range" id="scrub" min="0" max="1" step="0.001" value="0"><span class="val" id="scrubV">0.00</span></div>
+  </div>
+
+  <div class="sep"></div>
+  <div id="rotui">
+  <h2>Panel dönüşü (seçili paneller)</h2>
+  <div class="row" id="stepBtns">
+    <button data-s="30">30°</button><button data-s="45">45°</button><button data-s="90" class="on">90°</button>
+    <button data-s="180">180°</button><button data-s="360">360°</button>
+  </div>
+  <div class="row"><label>Tekrar (genel sürede)</label><input type="number" id="rcount" min="0" max="500" step="1" value="0"></div>
+  <div class="row"><label>Adım süresi (s)</label><input type="number" id="rdur" min="0.05" max="30" step="0.05" value="1"></div>
+  <div class="row"><label>Yön</label><button id="dirCW" class="on">CW</button><button id="dirCCW">CCW</button></div>
+  <div class="hint" id="rotInfo" style="margin-top:2px"></div>
+  <div class="row"><button id="rand">Rastgele</button><button id="reset">Hepsini sabitle</button></div>
+  </div>
+  <div class="hint">Boşluk: oynat/durdur · Esc: düzenle · R: rastgele dönüş</div>
+</div>
+
+<div id="ui" class="card">
+  <h1>İkon</h1>
+  <div id="editui">
+  <div class="row"><label>Panel seç</label><button id="selAll">Hepsi</button></div>
+  <div class="grid" id="pgrid"></div>
+
+  <div class="sep"></div>
+  <h2>Modifier</h2>
+  <div id="mods" class="off">
+    <div class="row"><label>Ölçek</label><input type="range" data-m="scale" min="0.1" max="3" step="0.01" value="1"><span class="val"></span></div>
+    <div class="row"><label>Döndür</label><input type="range" data-m="rot" min="-180" max="180" step="1" value="0"><span class="val"></span></div>
+    <div class="row"><label>Saydamlık</label><input type="range" data-m="alpha" min="0" max="1" step="0.01" value="1"><span class="val"></span></div>
+    <div class="row"><label>Derinlik (3B)</label><input type="range" data-m="depth" min="0.01" max="0.4" step="0.005" value="0.04"><span class="val"></span></div>
+    <div class="row"><label>Çizgi kalınlığı</label><input type="range" data-m="lw" min="0.02" max="0.3" step="0.005" value="0.08"><span class="val"></span></div>
+    <div class="row"><label>Konum X</label><input type="range" data-m="x" min="-0.5" max="0.5" step="0.005" value="0"><span class="val"></span></div>
+    <div class="row"><label>Konum Y</label><input type="range" data-m="y" min="-0.75" max="0.75" step="0.005" value="0"><span class="val"></span></div>
+    <div class="row"><label>Renk</label><input type="color" data-m="color" value="#b07cff"></div>
+    <div class="row"><label>Dolu</label><input type="checkbox" data-m="fill"></div>
+    <div class="row"><label>Ayna</label><button id="mxB">X</button><button id="myB">Y</button></div>
+  </div>
+  <div class="row"><button id="panelReset" style="flex:1">Seçili paneli sıfırla (A)</button></div>
+  </div>
+  <div class="hint">Paneli seç (tıkla / 1–9 / 0, Shift çoklu) → üstten ikona tıkla. İkonu panelde sürükleyerek konumla; panel dışına taşamaz. + ile resim yükle.</div>
+</div>
+
+<div id="scenecard" class="card">
+  <h1>Sahne</h1>
+  <div class="row"><label>Panel şeffaflığı</label><input type="range" id="opa" min="0" max="1" step="0.01" value="0.15"><span class="val" id="opaV">0.15</span></div>
+  <div class="row"><label>Kenar çizgisi</label><input type="checkbox" id="edges" checked></div>
+  <div class="row"><label>Tarama dairesi</label><input type="checkbox" id="rings" checked></div>
+  <div class="row"><button id="top">Üstten (T)</button><button id="persp">Perspektif (P)</button></div>
+</div>
+
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+// ---------- parametreler ----------
+const W = 1.0, H = 1.5, T = 0.02;   // panel genişlik / yükseklik / kalınlık
+const GAP = W, N = 3;               // merkez aralığı = genişlik → silindirler teğet
+const S = 0.55;                     // ikon temel boyutu (ölçek 1)
+const EPS = 1e-4;
+
+// ---------- sahne ----------
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x111111);
+const camera = new THREE.PerspectiveCamera(40, 1, 0.01, 100);
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true;
+controls.target.set(0, H / 2, 0);
+function perspView(){ camera.position.set(4.2, 3.6, 5.2); controls.update(); }
+function topView(){ camera.position.set(0, 8, 0.0001); controls.update(); }
+perspView();
+scene.add(new THREE.HemisphereLight(0xffffff, 0x333333, 1.1));
+const dl = new THREE.DirectionalLight(0xffffff, 0.8); dl.position.set(3, 6, 4); scene.add(dl);
+scene.add(new THREE.GridHelper(8, 16, 0x333333, 0x222222));
+
+// ---------- malzemeler ----------
+const panelMat = new THREE.MeshPhysicalMaterial({ color: 0x9fc3ff, transparent: true, opacity: 0.15, side: THREE.DoubleSide, roughness: 0.25, depthWrite: false });
+const selMat   = new THREE.MeshPhysicalMaterial({ color: 0xffd166, transparent: true, opacity: 0.28, side: THREE.DoubleSide, roughness: 0.25, depthWrite: false });
+const edgeMat = new THREE.LineBasicMaterial({ color: 0x9fc3ff });
+const edgeSelMat = new THREE.LineBasicMaterial({ color: 0xffd166 });
+const ringMat = new THREE.LineDashedMaterial({ color: 0x555555, dashSize: 0.05, gapSize: 0.05 });
+const selRingMat = new THREE.MeshBasicMaterial({ color: 0xffd166 });
+let iconColor = '#b07cff';
+
+// ---------- paneller ----------
+const panels = [];
+const boxGeo = new THREE.BoxGeometry(W, H, T);
+const edgeGeo = new THREE.EdgesGeometry(boxGeo);
+const ringGeo = new THREE.BufferGeometry().setFromPoints(
+  Array.from({ length: 65 }, (_, i) => { const a = i / 64 * Math.PI * 2; return new THREE.Vector3(Math.cos(a) * W / 2, 0.002, Math.sin(a) * W / 2); }));
+const selRingGeo = new THREE.TorusGeometry(W / 2, 0.012, 6, 64);
+
+const defaultIcon = () => ({ name: 'none', scale: 1, rot: 0, fill: false, alpha: 1, depth: 0.04, lw: 0.08, mx: false, my: false, x: 0, y: 0, color: iconColor });
+
+for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+  const g = new THREE.Group();
+  g.position.set((c - 1) * GAP, 0, (r - 1) * GAP);
+  const mesh = new THREE.Mesh(boxGeo, panelMat); mesh.position.y = H / 2;
+  const edges = new THREE.LineSegments(edgeGeo, edgeMat); edges.position.y = H / 2;
+  const pin = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, H + 0.1, 8), new THREE.MeshBasicMaterial({ color: 0x666666 })); pin.position.y = H / 2;
+  const iconMat = new THREE.MeshStandardMaterial({ color: iconColor, transparent: true, opacity: 1, side: THREE.DoubleSide, roughness: 0.5 });
+  const iconMesh = new THREE.Mesh(new THREE.BufferGeometry(), iconMat); iconMesh.visible = false;
+  g.add(mesh, edges, pin, iconMesh);
+  const ring = new THREE.Line(ringGeo, ringMat); ring.computeLineDistances(); ring.position.copy(g.position);
+  const selRing = new THREE.Mesh(selRingGeo, selRingMat); selRing.rotation.x = Math.PI / 2; selRing.position.copy(g.position); selRing.position.y = 0.004; selRing.visible = false;
+  scene.add(g, ring, selRing);
+  const p = { idx: r * N + c, group: g, mesh, edges, ring, selRing, iconMesh, iconMat, icon: defaultIcon(), angle: 0, from: 0, to: 0, t0: 0, dur: 1, busy: false, rot: { step: 90, count: 0, dur: 1, dir: 1 } };
+  mesh.userData.panel = p; iconMesh.userData.panel = p;
+  panels.push(p);
+}
+
+// ---------- ikon dış hatları (2B, panel birimi) ----------
+function offsetPolygon(pts, d){ // konveks, CCW
+  const n = pts.length, out = [];
+  for (let i = 0; i < n; i++) {
+    const a = pts[(i - 1 + n) % n], b = pts[i], c = pts[(i + 1) % n];
+    let e1x = b.x - a.x, e1y = b.y - a.y, l1 = Math.hypot(e1x, e1y); e1x /= l1; e1y /= l1;
+    let e2x = c.x - b.x, e2y = c.y - b.y, l2 = Math.hypot(e2x, e2y); e2x /= l2; e2y /= l2;
+    const n1x = e1y, n1y = -e1x, n2x = e2y, n2y = -e2x;
+    let mx = n1x + n2x, my = n1y + n2y; const ml = Math.hypot(mx, my); mx /= ml; my /= ml;
+    const k = d / (mx * n1x + my * n1y);
+    out.push({ x: b.x + mx * k, y: b.y + my * k });
+  }
+  return out;
+}
+const circlePts = (r, n = 64) => Array.from({ length: n }, (_, i) => { const a = i / n * Math.PI * 2; return { x: Math.cos(a) * r, y: Math.sin(a) * r }; });
+function arcPts(cx, cy, r, a0, a1, n = 8){ const o = []; for (let i = 0; i <= n; i++) { const a = a0 + (a1 - a0) * i / n; o.push({ x: cx + Math.cos(a) * r, y: cy + Math.sin(a) * r }); } return o; }
+function bez(p0, p1, p2, p3, t){ const u = 1 - t; return { x: u*u*u*p0.x + 3*u*u*t*p1.x + 3*u*t*t*p2.x + t*t*t*p3.x, y: u*u*u*p0.y + 3*u*u*t*p1.y + 3*u*t*t*p2.y + t*t*t*p3.y }; }
+function strokePolyline(pts, w){ // açık eğriyi kalınlaştır, yuvarlak uçlar
+  const n = pts.length, L = [], R = [];
+  for (let i = 0; i < n; i++) {
+    const a = pts[Math.max(0, i - 1)], b = pts[Math.min(n - 1, i + 1)];
+    let tx = b.x - a.x, ty = b.y - a.y, l = Math.hypot(tx, ty); tx /= l; ty /= l;
+    L.push({ x: pts[i].x - ty * w / 2, y: pts[i].y + tx * w / 2 });
+    R.push({ x: pts[i].x + ty * w / 2, y: pts[i].y - tx * w / 2 });
+  }
+  const tEnd = Math.atan2(pts[n-1].y - pts[n-2].y, pts[n-1].x - pts[n-2].x);
+  const tSt  = Math.atan2(pts[1].y - pts[0].y, pts[1].x - pts[0].x);
+  return [...L, ...arcPts(pts[n-1].x, pts[n-1].y, w / 2, tEnd + Math.PI / 2, tEnd - Math.PI / 2), ...R.reverse(), ...arcPts(pts[0].x, pts[0].y, w / 2, tSt - Math.PI / 2, tSt - 3 * Math.PI / 2)];
+}
+
+const IMAGES = {}; let imgSeq = 0;
+function outline(ic){ // {outer, hole, img?}
+  const lw = ic.lw, hole = ic.fill ? null : undefined;
+  if (ic.name.startsWith('img:')) {
+    const im = IMAGES[ic.name]; if (!im) return null;
+    const w = im.aspect >= 1 ? S : S * im.aspect, h = im.aspect >= 1 ? S / im.aspect : S;
+    return { outer: [{x:-w/2,y:-h/2},{x:w/2,y:-h/2},{x:w/2,y:h/2},{x:-w/2,y:h/2}], hole: null, img: im, w, h };
+  }
+  switch (ic.name) {
+    case 'dot':      return { outer: circlePts(S * 0.14 + lw / 2), hole: null };
+    case 'circle':   return { outer: circlePts(S / 2 + lw / 2), hole: hole === null ? null : circlePts(S / 2 - lw / 2) };
+    case 'square': { const h = S / 2, b = [{x:-h,y:-h},{x:h,y:-h},{x:h,y:h},{x:-h,y:h}]; return { outer: offsetPolygon(b, lw / 2), hole: hole === null ? null : offsetPolygon(b, -lw / 2) }; }
+    case 'triangle': { const b = [{x:0,y:S*.5},{x:-S*.55,y:-S*.45},{x:S*.55,y:-S*.45}]; return { outer: offsetPolygon(b, lw / 2), hole: hole === null ? null : offsetPolygon(b, -lw / 2) }; }
+    case 'diamond':  { const b = [{x:0,y:S*.62},{x:-S*.42,y:0},{x:0,y:-S*.62},{x:S*.42,y:0}]; return { outer: offsetPolygon(b, lw / 2), hole: hole === null ? null : offsetPolygon(b, -lw / 2) }; }
+    case 'line': { const l = S * 0.65, w = lw / 2; return { outer: [{x:w,y:-l},{x:w,y:l}, ...arcPts(0, l, w, 0, Math.PI), {x:-w,y:l},{x:-w,y:-l}, ...arcPts(0, -l, w, Math.PI, 2 * Math.PI)], hole: null }; }
+    case 'wave': {
+      const x0 = -S * .6, x1 = S * .6, a = S * .16, pts = [];
+      const A = [{x:x0,y:0},{x:x0+S*.3,y:a*3.2},{x:-S*.15,y:a*1.2},{x:0,y:0}], B = [{x:0,y:0},{x:S*.15,y:-a*1.2},{x:x1-S*.3,y:-a*3.2},{x:x1,y:0}];
+      for (let i = 0; i <= 24; i++) pts.push(bez(...A, i / 24));
+      for (let i = 1; i <= 24; i++) pts.push(bez(...B, i / 24));
+      return { outer: strokePolyline(pts, lw), hole: null };
+    }
+    default: return null;
+  }
+}
+// dönüşüm uygulanmış sınır kutusu (konum hariç)
+function bbox(ic, o){
+  const sx = ic.scale * (ic.mx ? -1 : 1), sy = ic.scale * (ic.my ? -1 : 1);
+  const cs = Math.cos(ic.rot * Math.PI / 180), sn = Math.sin(ic.rot * Math.PI / 180);
+  let minX = 1e9, maxX = -1e9, minY = 1e9, maxY = -1e9;
+  for (const p of o.outer) {
+    const px = p.x * sx, py = p.y * sy, x = cs * px - sn * py, y = sn * px + cs * py;
+    if (x < minX) minX = x; if (x > maxX) maxX = x; if (y < minY) minY = y; if (y > maxY) maxY = y;
+  }
+  return { minX, maxX, minY, maxY };
+}
+const fits = (ic, b) => ic.x + b.minX >= -W/2 - EPS && ic.x + b.maxX <= W/2 + EPS && ic.y + b.minY >= -H/2 - EPS && ic.y + b.maxY <= H/2 + EPS;
+const fitsNow = ic => { const o = outline(ic); return !o || fits(ic, bbox(ic, o)); };
+
+// konumu panel içine çek; sığmıyorsa ölçeği düşür
+function enforce(ic){
+  const o = outline(ic); if (!o) return;
+  let b = bbox(ic, o);
+  if (b.maxX - b.minX > W || b.maxY - b.minY > H) { // ölçek bisect
+    let lo = 0.01, hi = ic.scale;
+    for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; ic.scale = m; const bb = bbox(ic, o); (bb.maxX - bb.minX <= W && bb.maxY - bb.minY <= H) ? lo = m : hi = m; }
+    ic.scale = lo; b = bbox(ic, o);
+  }
+  ic.x = Math.min(Math.max(ic.x, -W/2 - b.minX), W/2 - b.maxX);
+  ic.y = Math.min(Math.max(ic.y, -H/2 - b.minY), H/2 - b.maxY);
+}
+// bir parametreyi eski→yeni arasında panel sınırına kadar ilerlet
+function bisectParam(ic, key, oldV, newV){
+  ic[key] = newV; if (fitsNow(ic)) return;
+  let lo = oldV, hi = newV;
+  for (let i = 0; i < 30; i++) { const m = (lo + hi) / 2; ic[key] = m; fitsNow(ic) ? lo = m : hi = m; }
+  ic[key] = lo;
+}
+
+// ---------- geometri ----------
+function rebuild(p){
+  const ic = p.icon, o = outline(ic);
+  preview ? retiredGeos.push(p.iconMesh.geometry) : p.iconMesh.geometry.dispose();
+  if (!o) { p.iconMesh.visible = false; p.iconMesh.geometry = new THREE.BufferGeometry(); return; }
+  if (p.faceMat) { p.faceMat.dispose(); p.faceMat = null; }
+  if (o.img) {
+    p.faceMat = new THREE.MeshStandardMaterial({ map: o.img.tex, transparent: true, side: THREE.DoubleSide, alphaTest: 0.05, roughness: 0.6 });
+    p.iconMesh.geometry = new THREE.PlaneGeometry(o.w, o.h);   // tek yüz, iki taraflı; derinlik resimde etkisiz
+    p.iconMesh.material = p.faceMat;
+  } else {
+    const shape = new THREE.Shape(o.outer.map(q => new THREE.Vector2(q.x, q.y)));
+    if (o.hole) shape.holes.push(new THREE.Path(o.hole.map(q => new THREE.Vector2(q.x, q.y))));
+    const geo = new THREE.ExtrudeGeometry(shape, { depth: ic.depth, bevelEnabled: false, curveSegments: 4 });
+    geo.translate(0, 0, -ic.depth / 2);
+    p.iconMesh.geometry = geo; p.iconMesh.material = p.iconMat;
+  }
+  p.iconMesh.visible = true;
+  applyTransform(p);
+}
+function applyTransform(p){
+  const ic = p.icon;
+  p.iconMesh.position.set(ic.x, H / 2 + ic.y, 0);
+  p.iconMesh.rotation.z = ic.rot * Math.PI / 180;
+  p.iconMesh.scale.set(ic.scale * (ic.mx ? -1 : 1), ic.scale * (ic.my ? -1 : 1), 1);
+  for (const m of mats(p.iconMesh)) { m.opacity = ic.alpha; m.depthWrite = ic.alpha >= 0.999; m.color.set(ic.color); }
+}
+const mats = m => Array.isArray(m.material) ? [...new Set(m.material)] : [m.material];
+const GEO_KEYS = new Set(['name', 'fill', 'depth', 'lw']);
+function applyMod(p, key, val){
+  touch(p);
+  const ic = p.icon, old = ic[key];
+  if (key === 'scale' || key === 'lw') bisectParam(ic, key, old, val);
+  else { ic[key] = val; enforce(ic); }
+  GEO_KEYS.has(key) ? rebuild(p) : applyTransform(p);
+}
+function setPanelIcon(p, name){ touch(p, true); if (p.icon.name === 'none') p.icon = defaultIcon(); if (name.startsWith('img:') && !p.icon.name.startsWith('img:')) p.icon.color = '#ffffff'; p.icon.name = name; enforce(p.icon); rebuild(p); refreshModUI(); }
+
+// ---------- ikon menüsü ----------
+const ICONS = ['none','dot','line','square','circle','triangle','diamond','wave'];
+function drawThumb(ctx, name, w, h){
+  const cx = w / 2, cy = h / 2, s = w * .55, lw = w * .08;
+  ctx.strokeStyle = ctx.fillStyle = '#ddd'; ctx.lineWidth = lw; ctx.lineCap = ctx.lineJoin = 'round'; ctx.beginPath();
+  switch (name) {
+    case 'dot': ctx.arc(cx, cy, s * .14 + lw / 2, 0, Math.PI * 2); ctx.fill(); return;
+    case 'line': ctx.moveTo(cx, cy - s * .65); ctx.lineTo(cx, cy + s * .65); break;
+    case 'square': ctx.rect(cx - s / 2, cy - s / 2, s, s); break;
+    case 'circle': ctx.arc(cx, cy, s / 2, 0, Math.PI * 2); break;
+    case 'triangle': ctx.moveTo(cx, cy - s * .5); ctx.lineTo(cx + s * .55, cy + s * .45); ctx.lineTo(cx - s * .55, cy + s * .45); ctx.closePath(); break;
+    case 'diamond': ctx.moveTo(cx, cy - s * .62); ctx.lineTo(cx + s * .42, cy); ctx.lineTo(cx, cy + s * .62); ctx.lineTo(cx - s * .42, cy); ctx.closePath(); break;
+    case 'wave': { const x0 = cx - s * .6, x1 = cx + s * .6, a = s * .16; ctx.moveTo(x0, cy); ctx.bezierCurveTo(x0 + s*.3, cy - a*3.2, cx - s*.15, cy - a*1.2, cx, cy); ctx.bezierCurveTo(cx + s*.15, cy + a*1.2, x1 - s*.3, cy + a*3.2, x1, cy); break; }
+  }
+  ctx.stroke();
+}
+const iconsEl = document.getElementById('icons');
+const upBtn = document.createElement('button'); upBtn.innerHTML = '<span class="up">+</span>'; upBtn.title = 'Resim yükle';
+upBtn.onclick = () => upFile.click();
+iconsEl.appendChild(upBtn); iconsEl.appendChild(bgopt);
+function addIconButton(name, imgUrl){
+  const b = document.createElement('button'); b.title = name;
+  if (name === 'none') b.innerHTML = '<span class="none">yok</span>';
+  else if (imgUrl) { const im = document.createElement('img'); im.src = imgUrl; b.appendChild(im); }
+  else { const cv = document.createElement('canvas'); cv.width = 72; cv.height = 108; drawThumb(cv.getContext('2d'), name, 72, 108); b.appendChild(cv); }
+  b.onclick = () => { if (!preview) selected.forEach(i => setPanelIcon(panels[i], name)); };
+  iconsEl.insertBefore(b, upBtn);
+  return b;
+}
+for (const name of ICONS) addIconButton(name);
+// kenarlardan taşma dolgusu: kenar rengine yakın ve kenara bağlı pikseller şeffaf olur
+function removeBg(srcCv, tol){
+  const w = srcCv.width, h = srcCv.height, out = document.createElement('canvas'); out.width = w; out.height = h;
+  const ctx = out.getContext('2d'); ctx.drawImage(srcCv, 0, 0);
+  const id = ctx.getImageData(0, 0, w, h), d = id.data;
+  let r = 0, g = 0, b = 0, n = 0; const add = i => { r += d[i*4]; g += d[i*4+1]; b += d[i*4+2]; n++; };
+  for (let x = 0; x < w; x++) { add(x); add((h-1)*w + x); } for (let y = 0; y < h; y++) { add(y*w); add(y*w + w-1); }
+  r /= n; g /= n; b /= n;
+  const tol2 = tol * tol, vis = new Uint8Array(w * h), stack = [];
+  const near = i => { if (d[i*4+3] < 10) return true; const dr = d[i*4]-r, dg = d[i*4+1]-g, db = d[i*4+2]-b; return dr*dr + dg*dg + db*db <= tol2; };
+  for (let x = 0; x < w; x++) stack.push(x, (h-1)*w + x); for (let y = 0; y < h; y++) stack.push(y*w, y*w + w-1);
+  while (stack.length) {
+    const i = stack.pop(); if (vis[i] || !near(i)) continue; vis[i] = 1;
+    const x = i % w, y = (i - x) / w;
+    if (x > 0 && !vis[i-1]) stack.push(i-1); if (x < w-1 && !vis[i+1]) stack.push(i+1);
+    if (y > 0 && !vis[i-w]) stack.push(i-w); if (y < h-1 && !vis[i+w]) stack.push(i+w);
+  }
+  for (let i = 0; i < w*h; i++) if (vis[i]) d[i*4+3] = 0;
+  for (let i = 0; i < w*h; i++) if (!vis[i]) { const x = i % w, y = (i - x) / w;   // 1 px yumuşatma
+    if ((x > 0 && vis[i-1]) || (x < w-1 && vis[i+1]) || (y > 0 && vis[i-w]) || (y < h-1 && vis[i+w])) d[i*4+3] = d[i*4+3] * 0.5 | 0; }
+  ctx.putImageData(id, 0, 0); return out;
+}
+function processImage(im){
+  const cv = bgRm.checked ? removeBg(im.orig, +bgTol.value) : im.orig;
+  im.tex.image = cv; im.tex.needsUpdate = true;
+  if (im.btn) im.btn.querySelector('img').src = cv.toDataURL();
+}
+function addImage(file){
+  const url = URL.createObjectURL(file), img = new Image();
+  img.onload = () => {
+    const k = Math.min(1, 1024 / Math.max(img.naturalWidth, img.naturalHeight));
+    const orig = document.createElement('canvas'); orig.width = Math.round(img.naturalWidth * k); orig.height = Math.round(img.naturalHeight * k);
+    orig.getContext('2d').drawImage(img, 0, 0, orig.width, orig.height); URL.revokeObjectURL(url);
+    const tex = new THREE.CanvasTexture(orig); tex.colorSpace = THREE.SRGBColorSpace;
+    const id = 'img:' + (++imgSeq);
+    const im = IMAGES[id] = { tex, orig, aspect: orig.width / orig.height, file: file.name };
+    addIconButton(id, orig.toDataURL()); im.btn = iconsEl.querySelector(`button[title="${id}"]`);
+    processImage(im); bgopt.hidden = false;
+  };
+  img.src = url;
+}
+bgRm.onchange = bgTol.onchange = () => Object.values(IMAGES).forEach(processImage);
+upFile.onchange = () => { [...upFile.files].forEach(addImage); upFile.value = ''; };
+addEventListener('dragover', e => e.preventDefault());
+addEventListener('drop', e => { e.preventDefault(); [...e.dataTransfer.files].filter(f => f.type.startsWith('image/')).forEach(addImage); });
+
+// ---------- seçim ----------
+let selected = new Set([4]);
+
+const gridEl = document.getElementById('pgrid'), pBtns = [];
+for (let i = 0; i < 9; i++) {
+  const b = document.createElement('button'); b.textContent = i + 1;
+  b.onclick = e => e.shiftKey ? toggleSel(i) : setSel([i]);
+  gridEl.appendChild(b); pBtns.push(b);
+}
+function setSel(arr){ selected = new Set(arr); refreshSel(); }
+function toggleSel(i){ selected.has(i) ? selected.delete(i) : selected.add(i); refreshSel(); }
+function refreshSel(){
+  pBtns.forEach((b, i) => b.classList.toggle('on', selected.has(i)));
+  panels.forEach(p => { const on = selected.has(p.idx); p.edges.material = on ? edgeSelMat : edgeMat; p.mesh.material = on ? selMat : panelMat; p.selRing.visible = on && !preview; });
+  refreshModUI(); refreshRotUI();
+}
+
+// ---------- modifier UI ----------
+const modsEl = document.getElementById('mods');
+const modInputs = [...modsEl.querySelectorAll('[data-m]')];
+function firstSel(){ let f = null; for (const i of selected) { if (!f) f = panels[i]; if (panels[i].icon.name !== 'none') return panels[i]; } return f; }
+function refreshModUI(){
+  const p = firstSel(), active = p && p.icon.name !== 'none';
+  modsEl.classList.toggle('off', !active);
+  if (!p) return;
+  for (const inp of modInputs) {
+    const k = inp.dataset.m, v = p.icon[k];
+    if (inp.type === 'checkbox') inp.checked = !!v; else if (inp.type === 'color') inp.value = v; else { inp.value = v; const s = inp.nextElementSibling; if (s) s.textContent = (+v).toFixed(k === 'rot' ? 0 : 2) + (k === 'rot' ? '°' : ''); }
+  }
+  mxB.classList.toggle('on', !!p.icon.mx); myB.classList.toggle('on', !!p.icon.my);
+}
+for (const inp of modInputs) inp.oninput = () => {
+  const k = inp.dataset.m, v = inp.type === 'checkbox' ? inp.checked : inp.type === 'color' ? inp.value : +inp.value;
+  selected.forEach(i => applyMod(panels[i], k, v));
+  refreshModUI(); // sınırda durduysa kaydırıcı gerçek değere döner
+};
+mxB.onclick = () => { const v = !firstSel()?.icon.mx; selected.forEach(i => applyMod(panels[i], 'mx', v)); refreshModUI(); };
+myB.onclick = () => { const v = !firstSel()?.icon.my; selected.forEach(i => applyMod(panels[i], 'my', v)); refreshModUI(); };
+// seçili panelleri yalnız bu karede boşalt (ikon + modifier'lar varsayılana)
+panelReset.onclick = () => { selected.forEach(i => { touch(panels[i], true); panels[i].icon = defaultIcon(); rebuild(panels[i]); }); refreshModUI(); };
+
+// ---------- zaman: kareler ve oynatma ----------
+const kf = { A: null, B: null };
+const touched = { A: new Set(), B: new Set() };   // o karede elle değiştirilen paneller
+const touch = (p, force) => { if (force || p.icon.name !== 'none') touched[editKey].add(p.idx); };
+const retiredGeos = [], ghosts = [];
+let editKey = 'A', preview = false, playing = false, playStart = 0, playT = 0, lastFrame = -1;
+const snapshot = () => panels.map(p => ({ icon: { ...p.icon } }));
+function load(snap){
+  panels.forEach((p, i) => { p.icon = { ...snap[i].icon }; rebuild(p); });
+  refreshModUI(); showPose();
+}
+function switchKey(k){
+  if (preview) exitPreview();
+  kf[editKey] = snapshot();
+  if (!kf[k]) kf[k] = snapshot();
+  const other = k === 'A' ? 'B' : 'A';
+  kf[k].forEach((s, i) => { if (!touched[k].has(i)) s.icon = { ...kf[other][i].icon }; });
+  editKey = k; load(kf[k]);
+  kfA.classList.toggle('on', k === 'A'); kfB.classList.toggle('on', k === 'B');
+  panelReset.textContent = `Seçili paneli sıfırla (${k})`;
+}
+kfA.onclick = () => switchKey('A');
+kfB.onclick = () => switchKey('B');
+
+const EASES = { lin: t => t, io: t => t < .5 ? 2*t*t : 1 - Math.pow(-2*t+2, 2) / 2, in: t => t*t, out: t => 1 - (1-t)*(1-t) };
+const LERP_KEYS = ['scale', 'rot', 'alpha', 'depth', 'lw', 'x', 'y'];
+const lerp = (a, b, t) => a + (b - a) * t;
+const _cA = new THREE.Color(), _cB = new THREE.Color();
+
+function setPanelsVisible(v){
+  panels.forEach(p => { p.mesh.visible = v; p.edges.visible = v && edges.checked; p.ring.visible = v && rings.checked; p.selRing.visible = v && selected.has(p.idx); p.group.children[2].visible = v; });
+  scene.children.find(o => o.type === 'GridHelper').visible = v;
+}
+function enterPreview(){
+  if (preview) return;
+  kf[editKey] = snapshot(); if (!kf.A) kf.A = snapshot(); if (!kf.B) kf.B = snapshot();
+  preview = true; setPanelsVisible(false); editui.classList.add('off'); rotui.classList.add('off');
+}
+function spawnGhosts(now){
+  const life = +trail.value; if (!(life > 0)) return;
+  for (const p of panels) if (p.iconMesh.visible) {
+    const uniq = mats(p.iconMesh), gm = uniq.map(x => { const c = x.clone(); c.depthWrite = false; c.transparent = true; return c; });
+    const m = new THREE.Mesh(p.iconMesh.geometry, Array.isArray(p.iconMesh.material) ? p.iconMesh.material.map(x => gm[uniq.indexOf(x)]) : gm[0]);
+    m.matrixAutoUpdate = false; m.matrix.copy(p.iconMesh.matrixWorld);
+    scene.add(m); ghosts.push({ m, born: now, a0: p.icon.alpha, life });
+  }
+}
+const MAX_GHOSTS = 1500;
+function killGhost(i){ const g = ghosts[i]; scene.remove(g.m); mats(g.m).forEach(x => x.dispose()); ghosts.splice(i, 1); }
+function updateGhosts(now){
+  for (let i = ghosts.length - 1; i >= 0; i--) {
+    const g = ghosts[i], k = (now - g.born) / g.life;
+    if (k >= 1) killGhost(i); else mats(g.m).forEach(x => x.opacity = g.a0 * (1 - k));
+  }
+  while (ghosts.length > MAX_GHOSTS) killGhost(0);
+  if (retiredGeos.length) {   // hiçbir izin kullanmadığı eski geometrileri hemen sil
+    const used = new Set(ghosts.map(g => g.m.geometry));
+    for (let i = retiredGeos.length - 1; i >= 0; i--) if (!used.has(retiredGeos[i])) { retiredGeos[i].dispose(); retiredGeos.splice(i, 1); }
+  }
+}
+function clearGhosts(){ for (const g of ghosts) { scene.remove(g.m); mats(g.m).forEach(x => x.dispose()); } ghosts.length = 0; }
+function exitPreview(){
+  playing = false; preview = false; rotui.classList.remove('off'); clearGhosts(); retiredGeos.forEach(g => g.dispose()); retiredGeos.length = 0;
+  panels.forEach(p => { p.angle = -p.group.rotation.y; p.busy = false; }); setPanelsVisible(true); editui.classList.remove('off');
+  load(kf[editKey]);
+}
+function showFrame(t){
+  const e = EASES[easing.value](t);
+  for (let i = 0; i < panels.length; i++) {
+    const p = panels[i], a = kf.A[i], b = kf.B[i];
+    p.group.rotation.y = -panelAngleAt(p, t);
+    const ai = a.icon, bi = b.icon, ic = { ...ai };
+    const aNone = ai.name === 'none', bNone = bi.name === 'none';
+    if (aNone && bNone) { p.icon = ic; p.iconMesh.visible = false; continue; }
+    if (aNone) { ic.name = bi.name; }                     // belirir: B'nin haliyle, saydamlık 0→alpha
+    else if (bNone) { ic.name = ai.name; }               // kaybolur
+    else if (ai.name !== bi.name) ic.name = e < .5 ? ai.name : bi.name;
+    const src = aNone ? bi : ai, dst = bNone ? ai : bi;
+    for (const k of LERP_KEYS) ic[k] = lerp(src[k], dst[k], e);
+    if (aNone) ic.alpha = lerp(0, bi.alpha, e); else if (bNone) ic.alpha = lerp(ai.alpha, 0, e);
+    ic.color = '#' + _cA.set(src.color).lerp(_cB.set(dst.color), e).getHexString();
+    ic.fill = e < .5 ? src.fill : dst.fill;
+    ic.mx = e < .5 ? src.mx : dst.mx; ic.my = e < .5 ? src.my : dst.my;
+    enforce(ic);
+    const geoChanged = !p.icon || p.icon.name !== ic.name || p.icon.fill !== ic.fill || Math.abs(p.icon.depth - ic.depth) > 1e-6 || Math.abs(p.icon.lw - ic.lw) > 1e-6;
+    p.icon = ic;
+    geoChanged ? rebuild(p) : applyTransform(p);
+    // ayna geçişi: işaretli ölçek üzerinden çevirme animasyonu
+    const sx = lerp(src.scale * (src.mx ? -1 : 1), dst.scale * (dst.mx ? -1 : 1), e) / ic.scale;
+    const sy = lerp(src.scale * (src.my ? -1 : 1), dst.scale * (dst.my ? -1 : 1), e) / ic.scale;
+    p.iconMesh.scale.set(ic.scale * sx, ic.scale * sy, 1);
+  }
+  scrub.value = t; scrubV.textContent = t.toFixed(2);
+}
+play.onclick = () => { enterPreview(); clearGhosts(); lastFrame = -1; playT = +scrub.value >= 1 ? 0 : +scrub.value; playStart = performance.now() / 1000 - playT * +animDur.value; playing = true; };
+stopBtn.onclick = () => { playing = false; };
+edit.onclick = exitPreview;
+scrub.oninput = () => { enterPreview(); playing = false; playT = +scrub.value; showFrame(playT); };
+
+// ---------- panel dönüşü ----------
+const totalAngle = p => p.rot.dir * p.rot.step * p.rot.count * Math.PI / 180;
+// t (0..1) anında panelin açısı: tekrar adımı genel süreye eşit aralıklarla dağıtılır
+function panelAngleAt(p, t){
+  const T = Math.max(0.1, +animDur.value), n = p.rot.count; if (n <= 0) return 0;
+  const iv = T / n, sd = Math.min(p.rot.dur, iv), tau = t * T, k = Math.floor(tau / iv);
+  if (k >= n) return totalAngle(p);
+  const loc = Math.min(1, (tau - k * iv) / sd);
+  return p.rot.dir * p.rot.step * (k + EASES[easing.value](loc)) * Math.PI / 180;
+}
+// düzenleme modunda panel pozu: A → 0, B → bitiş açısı (kısa tween ile)
+function showPose(){
+  const now = performance.now() / 1000;
+  panels.forEach(p => { const target = editKey === 'B' ? totalAngle(p) : 0; const cur = p.busy ? p.to : p.angle;
+    if (Math.abs(target - cur) > 1e-9) { p.from = p.angle; p.to = target; p.t0 = now; p.dur = 0.6; p.busy = true; } });
+}
+const ease = t => t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3) / 2;
+function setRot(key, val){ selected.forEach(i => panels[i].rot[key] = val); refreshRotUI(); showPose(); }
+function refreshRotUI(){
+  const p = firstSel(); if (!p) return;
+  document.querySelectorAll('#stepBtns button').forEach(b => b.classList.toggle('on', +b.dataset.s === p.rot.step));
+  rcount.value = p.rot.count; rdur.value = p.rot.dur;
+  dirCW.classList.toggle('on', p.rot.dir === 1); dirCCW.classList.toggle('on', p.rot.dir === -1);
+  const T = Math.max(0.1, +animDur.value), n = p.rot.count;
+  rotInfo.textContent = n > 0 ? `aralık ${(T / n).toFixed(2)} s · adım ${Math.min(p.rot.dur, T / n).toFixed(2)} s · toplam ${p.rot.dir * p.rot.step * n}°` : 'sabit';
+}
+document.querySelectorAll('#stepBtns button').forEach(b => b.onclick = () => setRot('step', +b.dataset.s));
+rcount.oninput = () => setRot('count', Math.max(0, Math.round(+rcount.value) || 0));
+rdur.oninput = () => setRot('dur', Math.max(0.05, +rdur.value || 0.05));
+dirCW.onclick  = () => setRot('dir', 1);
+dirCCW.onclick = () => setRot('dir', -1);
+animDur.oninput = refreshRotUI;
+selAll.onclick = () => setSel([0,1,2,3,4,5,6,7,8]);
+opa.oninput = e => { panelMat.opacity = +e.target.value; selMat.opacity = Math.min(1, +e.target.value + 0.13); opaV.textContent = (+e.target.value).toFixed(2); };
+edges.onchange = e => panels.forEach(p => p.edges.visible = e.target.checked);
+rings.onchange = e => panels.forEach(p => p.ring.visible = e.target.checked);
+rand.onclick = randomize;
+reset.onclick = () => { panels.forEach(p => p.rot = { step: 90, count: 0, dur: 1, dir: 1 }); refreshRotUI(); showPose(); };
+document.getElementById("top").onclick = topView;
+persp.onclick = perspView;
+function randomize(){
+  const steps = [30, 45, 90, 180, 360];
+  panels.forEach(p => p.rot = { step: steps[Math.random() * 5 | 0], count: Math.random() * 5 | 0, dur: +(0.3 + Math.random() * 1.5).toFixed(2), dir: Math.random() < .5 ? 1 : -1 });
+  refreshRotUI(); showPose();
+}
+
+// ---------- tıklama / sürükleme ----------
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
+let downPos = null, drag = null;
+const _plane = new THREE.Plane(), _pt = new THREE.Vector3(), _n = new THREE.Vector3();
+function castAt(e){ mouse.set(e.clientX / innerWidth * 2 - 1, -(e.clientY / innerHeight) * 2 + 1); ray.setFromCamera(mouse, camera); }
+function panelPlane(p){ _n.set(0, 0, 1).applyQuaternion(p.group.quaternion); _pt.set(0, H / 2, 0).applyMatrix4(p.group.matrixWorld); _plane.setFromNormalAndCoplanarPoint(_n, _pt); }
+canvas.addEventListener('pointerdown', e => {
+  downPos = [e.clientX, e.clientY];
+  if (preview) return;
+  castAt(e);
+  const hit = ray.intersectObjects(panels.filter(p => selected.has(p.idx) && p.iconMesh.visible).map(p => p.iconMesh))[0];
+  if (hit) {
+    const p = hit.object.userData.panel; panelPlane(p);
+    const loc = p.group.worldToLocal(hit.point.clone());
+    drag = { p, ox: loc.x - p.icon.x, oy: (loc.y - H / 2) - p.icon.y };
+    controls.enabled = false;
+  }
+});
+canvas.addEventListener('pointermove', e => {
+  if (!drag) return;
+  castAt(e); panelPlane(drag.p);
+  const w = new THREE.Vector3(); if (!ray.ray.intersectPlane(_plane, w)) return;
+  const loc = drag.p.group.worldToLocal(w);
+  const ic = drag.p.icon; ic.x = loc.x - drag.ox; ic.y = (loc.y - H / 2) - drag.oy;
+  touch(drag.p); enforce(ic); applyTransform(drag.p); refreshModUI();
+});
+canvas.addEventListener('pointerup', e => {
+  if (preview) return;
+  if (drag) { drag = null; controls.enabled = true; return; }
+  if (!downPos || Math.hypot(e.clientX - downPos[0], e.clientY - downPos[1]) > 4) return;
+  castAt(e);
+  const hit = ray.intersectObjects(panels.flatMap(p => [p.mesh, p.iconMesh]))[0];
+  if (hit) { const i = hit.object.userData.panel.idx; e.shiftKey ? toggleSel(i) : setSel([i]); }
+});
+addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
+  if (e.key >= '1' && e.key <= '9') setSel([+e.key - 1]);
+  else if (e.key === '0') setSel([0,1,2,3,4,5,6,7,8]);
+  else if (e.key === 'r' || e.key === 'R') randomize();
+  else if (e.key === 'p' || e.key === 'P') perspView();
+  else if (e.key === 't' || e.key === 'T') topView();
+  else if (e.key === ' ') { e.preventDefault(); playing ? stopBtn.onclick() : play.onclick(); }
+  else if (e.key === 'Escape') exitPreview();
+});
+
+// ---------- döngü ----------
+function resize(){
+  const w = innerWidth, h = innerHeight, pr = renderer.getPixelRatio();
+  if (canvas.width !== (w * pr | 0) || canvas.height !== (h * pr | 0)) { renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+}
+function tick(){
+  resize();
+  const now = performance.now() / 1000;
+  if (playing) {
+    const d = Math.max(0.1, +animDur.value), f = Math.max(1, +fps.value);
+    let t = (now - playStart) / d;
+    if (t >= 1) { if (loop.checked) { t %= 1; playStart = now - t * d; lastFrame = -1; } else { t = 1; playing = false; } }
+    const frame = Math.min(Math.floor(t * d * f), Math.ceil(d * f));
+    if (frame !== lastFrame) { spawnGhosts(now); lastFrame = frame; playT = Math.min(1, frame / (d * f)); showFrame(playT); }
+    if (!playing) showFrame(1);
+  }
+  updateGhosts(now);
+  for (const p of panels) if (!preview && p.busy) {
+    const k = Math.min(1, (now - p.t0) / p.dur);
+    p.angle = p.from + (p.to - p.from) * ease(k);
+    if (k >= 1) { p.angle = p.to; p.busy = false; }
+    p.group.rotation.y = -p.angle;
+  }
+  controls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(tick);
+}
+refreshSel();
+tick();
+</script>
+</body>
+</html>
